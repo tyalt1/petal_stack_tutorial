@@ -253,12 +253,13 @@ Now when we click the + button we see the log and the counter update.
 [debug] Replied in 413µs
 ```
 
-That is most everything you need to get started with LiveView but not all the functionality
+That is mostly everything you need to get started with LiveView but not all the functionality. Below are notable examples:
 
+- [`Phoenix.LiveComponent`](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveComponent.html) which are components that maintain their own state, handle their own events, and cant be embedded in a LiveView.
+- Handle events locally with [`Phoenix.LiveView.JS`](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.JS.html)
 - Implement `handle_info/2` to handle server-side events sent from other processes, for real-time updates to the UI.
-- File upload
-- Lazy-Evaluation style streaming values
-- Local events handled by `Phoenix.LiveView.JS`
+- [File uploads](https://hexdocs.pm/phoenix_live_view/uploads.html)
+- Lazy-Evaluation style [streaming values](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html#stream/4)
 
 ### Section 3: Intro to Ash
 
