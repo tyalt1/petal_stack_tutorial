@@ -218,12 +218,11 @@ Recall we set the `phx-click` and `phx-debounce` attributes on the buttons, whic
 ** (UndefinedFunctionError) function PetalStackTutorialWeb.Counter.handle_event/3 is undefined or private
 ```
 
-What happens
-1. We click the +
-2. The "inc" event is sent via the websocket.
-3. We try to call `handle_event/3` and get a function not defined error.
-4. The Elixir process dies due to a unhandled exception.
-5. The process is restarted by a supervisor and reconnects to our websocket.
+What happens when we click the +
+1. The "inc" event is sent via the websocket.
+2. We try to call `handle_event/3` and get a function not defined error.
+3. The Elixir process dies due to a unhandled exception.
+4. The process is restarted by a supervisor and reconnects to our websocket.
 
 You will see a small red flash alert telling you the page loses connection for a moment, then disappear when the connection is reestablished.
 
@@ -257,10 +256,275 @@ That is mostly everything you need to get started with LiveView but not all the 
 
 - [`Phoenix.LiveComponent`](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveComponent.html) which are components that maintain their own state, handle their own events, and cant be embedded in a LiveView.
 - Handle events locally with [`Phoenix.LiveView.JS`](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.JS.html)
+- [Forms](https://hexdocs.pm/phoenix_live_view/form-bindings.html)
 - Implement `handle_info/2` to handle server-side events sent from other processes, for real-time updates to the UI.
 - [File uploads](https://hexdocs.pm/phoenix_live_view/uploads.html)
 - Lazy-Evaluation style [streaming values](https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html#stream/4)
 
 ### Section 3: Intro to Ash
+
+Ash is used to declare models and derive other functionality from those declarations. A declaration is an `Ash.Resource`. All `Ash.Resource`s are inside an `Ash.Domain`.
+
+We'll follow the [Ash Phoenix tutorial](https://ash-hq.org/docs/guides/ash_phoenix/latest/tutorials/getting-started-with-ash-and-phoenix) for creating a Blog.
+
+#### Ash Boilerplate
+
+Ash is the only element of the PETAL Stack that does not come with Elixir or Phoenix. Install Ash by adding the following and run `mix deps.get`
+```elixir
+defp deps do
+  [
+    {:ash, "~> 3.0"},
+    {:ash_phoenix, "~> 2.0"},
+    {:ash_postgres, "~> 2.0"},
+    ...
+  ]
+end
+```
+
+Optionally, make the changes to `.formatter.exs`
+```elixir
+[
+  import_deps: [..., :ash, :ash_phoenix, :ash_postgres],
+  ...
+]
+```
+
+Change the file `lib/petal_stack_tutorial/repo.ex` to contain this.
+```elixir
+defmodule PetalStackTutorial.Repo do
+  use AshPostgres.Repo,
+    otp_app: :petal_stack_tutorial
+
+  # Installs extensions that ash commonly uses
+  def installed_extensions do
+    ["ash-functions", "uuid-ossp", "citext"]
+  end
+end
+```
+
+Note: `otp_app` must be set to the application name.
+
+Remove references to `ecto` in your `mix.exs` `aliases`. Replace `ecto.setup` with `ash.setup`. It should look something like this:
+```elixir
+defp aliases do
+  [
+    setup: ["deps.get", "ash.setup", "assets.setup", "assets.build"],
+    ...
+  ]
+end
+```
+
+Make the change to the `config/config.exs` files. We need to list all domains. For now we'll add the Blog domain we're adding next.
+```elixir
+config :petal_stack_tutorial,
+  ash_domains: [PetalStackTutorial.Blog]
+```
+
+Create the file `lib/petal_stack_tutorial/blog/blog.ex` which will be our `Blog` domain. This domain will contain the Post resource we're adding next.
+```elixir
+defmodule PetalStackTutorial.Blog do
+  use Ash.Domain
+
+  resources do
+    resource PetalStackTutorial.Blog.Post
+  end
+end
+```
+
+Now we can create a Post resource.
+```elixir
+defmodule PetalStackTutorial.Blog.Post do
+  use Ash.Resource,
+    domain: PetalStackTutorial.Blog,
+    data_layer: AshPostgres.DataLayer,
+    extensions: []
+
+  postgres do
+    table "posts"
+    repo PetalStackTutorial.Repo
+  end
+
+  attributes do
+    uuid_primary_key :id
+    create_timestamp :created_at
+    update_timestamp :updated_at
+
+    attribute :title, :string do
+      allow_nil? false
+    end
+
+    attribute :content, :string
+  end
+
+  actions do
+    defaults [:read, :destroy]
+
+    create :create do
+      accept [:title]
+    end
+
+    update :update do
+      accept [:content]
+    end
+
+    read :get do
+      argument :id, :uuid, allow_nil?: false
+      get? true # read will only return 1 value, not a list
+      filter expr(id == ^arg(:id))
+    end
+  end
+end
+```
+
+The syntax for `Ash.Resource` and `Ash.Domain` should look odd. This is not Elixir, this is a DSL defined using Elixir macros. Refer to the [Ash DSL documentation](https://hexdocs.pm/ash/3.0.9/dsl-ash-resource.html) for more info.
+
+#### Deep dive into `Ash.Resource`
+
+Review of what we've done so far
+1. We added Ash, AshPhoenix, and AshPostgres as dependancies
+2. Added formatting rules for `mix format`
+3. Refactored `PetalStackTutorial.Repo` to use `AshPostgres` instead of `Ecto`.
+4. Added `ash.setup` to our `setup` mix alias.
+5. Add list of domains to our config file, include the Blog domain.
+6. Create the Blog domain, which contains the Post resource.
+7. Created the Post resource.
+
+The first 4 steps were boiler plate we don't need to touch again. The config file only needs to be updated if we create a new doamin. The domain was made to hold the resource. There isn't much to do in the domain yet. Let's look at the Post resource.
+
+```elixir
+use Ash.Resource,
+    domain: PetalStackTutorial.Blog,
+    data_layer: AshPostgres.DataLayer,
+    extensions: []
+```
+
+This declares the module to be a `Ash.Resource`. `domain` is the domain module. We've already defined the Blog module. `data_layer` is the module that defines how this module will be persisted. Ash comes with data layers that saves these models in memory, in ETS, and more. The `AshPostgres.DataLayer` is a data layer we installed that writes the value to a Postgres database. `extensions` can be used to add more blocks than what Ash comes with. These can be used to add the `json_api` block for generating REST APIs or the `graphql` block for generating GraphQL APIs. For now we will have no extensions.
+
+```elixir
+postgres do
+  table "posts"
+  repo PetalStackTutorial.Repo
+end
+```
+
+This block declares the name of the table and what `Repo` module is used to read/write to/from the database.
+
+```elixir
+attributes do
+  uuid_primary_key :id
+  create_timestamp :created_at
+  update_timestamp :updated_at
+
+  attribute :title, :string do
+    allow_nil? false
+  end
+
+  attribute :content, :string
+end
+
+actions do
+  defaults [:read, :destroy]
+
+  create :create do
+    accept [:title, :content]
+  end
+
+  update :update do
+    accept [:content] # only edit content, not title
+  end
+
+  read :get do
+    argument :id, :uuid, allow_nil?: false
+    get? true # read will only return 1 value, not a list
+    filter expr(id == ^arg(:id))
+  end
+end
+```
+
+These are the two blocks every `Ash.Resource` will have. `attributes` is the data and `actions` are the operations and workflows it supports.
+
+Post has the UUID primary key that is auto-generated and included. Post also has the created and updated timestamps that are auto-updated. Finally Post includes two standard attributes: title and content. The title attribute has an additional block include to specify it can not be nil. This validation will be performed on all write actions.
+
+Developers can write CRUD operations in their sleep. Ash writes them for you. `defaults` is a list of default actions added to the resource. We explicitly have a `create` and `update` action so we can state what attributes we can accpet. In `update` we can change the content of the post, but not the title. We can pass both in `create`. We also include another `read` function called `get`. The default `read` function returns a list of all elements, so we also add an extra `read` action called `get` that returns a Post for the given ID.
+
+We need to do one more thing before we run our code. Run the following to generate and run migrations. We'll use "blog_post" as a name of the migrations but it could be anything.
+```
+mix ash.codegen blog_post
+mix ash.setup
+```
+
+#### Using `Ash.Resource` in code
+
+Now we can run the following in the console:
+```elixir
+alias PetalStackTutorial.Blog.Post
+
+# create post
+new_post = Post |> Ash.Changeset.for_create(:create, %{title: "hello world"}) |> Ash.create!()
+
+# read all posts
+Post |> Ash.Query.for_read(:read) |> Ash.read!()
+
+# get single post by id
+Post |> Ash.Query.for_read(:get, %{id: new_post.id}) |> Ash.read_one!()
+# OR
+Post |> Ash.get!(new_post.id)
+
+# update post
+updated_post = new_post |> Ash.Changeset.for_update(:update, %{content: "hello to you too!"}) |> Ash.update!()
+
+# delete post
+new_post |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
+```
+
+Here we can change the model with `Ash.Changeset` and read it with `Ash.Query`. We create a `Ash.Changeset` and `Ash.Query` with the name of the module, the name of the action, and additional options like new fields or filtering criteria. We then pass this to the correct `Ash` function to run the action. All the callbacks are either implented by Ash or derived from the `attributes` and `actions` blocks. All of these actions are reading and writing values to/from the given Data Layer, in this case Postgres.
+
+This is a lot of code. We can define wrappers with the `code_interface` block in the resource. However for now we'll only define them as part of the domain. Change the Blog doamin to now contain.
+
+```elixir
+defmodule PetalStackTutorial.Blog do
+  use Ash.Domain
+
+  resources do
+    resource PetalStackTutorial.Blog.Post do
+      define :create_post, action: :create
+      define :list_posts, action: :read
+      define :update_post, action: :update
+      define :destroy_post, action: :destroy
+      define :get_post, action: :get, args: [:id]
+    end
+  end
+end
+```
+
+The line `define :create_post, action: :create` defines a function called `create_post` that will run the `create` action for the `Post` resource. The other defines work similarly.
+
+Now we can use the Blog domain functions to run the actions of Post.
+```elixir
+alias PetalStackTutorial.Blog
+
+# create post
+new_post = Blog.create_post!(%{title: "hello world"})
+
+# read post
+Blog.list_posts!()
+
+# get post by id
+Blog.get_post!(new_post.id)
+
+# update post
+updated_post = Blog.update_post!(new_post, %{content: "hello to you too!"})
+
+# delete post
+Blog.destroy_post!(updated_post)
+```
+
+The implementation of these actions are only defined once in the `actions` block of the Post resource. This lays the foundation for deriving more functionality from these actions. We could also create other resources and domains.
+
+In further sections I'll discuss
+- User and Login with `AshAuthentication`
+- Integrating Ash models with LiveView forms
+- REST API with `AshJsonApi`
+- GraphQL API with `AshGraphql`
 
 ### Section 4: TBD

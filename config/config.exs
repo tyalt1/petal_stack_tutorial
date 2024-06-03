@@ -8,8 +8,7 @@
 import Config
 
 config :petal_stack_tutorial,
-  ecto_repos: [PetalStackTutorial.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  ash_domains: [PetalStackTutorial.Blog]
 
 # Configures the endpoint
 config :petal_stack_tutorial, PetalStackTutorialWeb.Endpoint,
