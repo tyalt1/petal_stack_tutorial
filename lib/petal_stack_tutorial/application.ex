@@ -10,7 +10,8 @@ defmodule PetalStackTutorial.Application do
     children = [
       PetalStackTutorialWeb.Telemetry,
       PetalStackTutorial.Repo,
-      {DNSCluster, query: Application.get_env(:petal_stack_tutorial, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:petal_stack_tutorial, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: PetalStackTutorial.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: PetalStackTutorial.Finch},
