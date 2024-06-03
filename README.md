@@ -25,7 +25,7 @@ Elixir runs on the Erlang VM which has many examples of scalability
 - The company that created Erlang boasts only 5.2 minutes of downtime a year in their systems running Erlang.
 - Whatsup was able to maintain 2 million TCP connections on a single server using 40% CPU of a server from 2012 using Erlang. [Source](https://blog.whatsapp.com/1-million-is-so-2011)
 - A developer rewrote an AWS microservice application in Elixir. The resulting application was faster and cost less to run in the cloud. [Source](https://medium.com/coryodaniel/from-erverless-to-elixir-48752db4d7bc)
-- Discord as many examples of using Elixir as thier primay language to scale to a large amount of users. [Source](https://discord.com/blog/using-rust-to-scale-elixir-for-11-million-concurrent-users)
+- Discord has many examples of using Elixir as thier primay language to scale to a large amount of users. [Source](https://discord.com/blog/using-rust-to-scale-elixir-for-11-million-concurrent-users)
 
 ### Examples of productivity
 
@@ -34,7 +34,7 @@ Elixir runs on the Erlang VM which has many examples of scalability
 - Phoenix is a batteries included framework that's designed to get started as fast as possible.
   - [Source: Build a real-time twitter clone in 15 minutes](https://www.phoenixframework.org/blog/build-a-real-time-twitter-clone-in-15-minutes-with-live-view-and-phoenix-1-5)
 - Including Tailwind means your project starts with over 37,000 CSS classes already defined.
-- LiveView handles the connection to between backend and frontend so you don't need to maintain a backend REST API or a frontend Javascript client for your frontend.
+- LiveView handles the connection to between backend and frontend so you don't need to maintain a backend REST API or a Javascript client for your frontend.
 - With LiveView developers can write reactive single-page frontends in HTML and Elixir. (No Javascript)
 - Ash lets you define a model and then with minimal code derive database persistance, code wrappers, REST API, GraphQL API, and more.
 
