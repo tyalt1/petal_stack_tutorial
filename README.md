@@ -523,9 +523,15 @@ Blog.destroy_post!(updated_post)
 The implementation of these actions are only defined once in the `actions` block of the Post resource. This lays the foundation for deriving more functionality from these actions. We could also create other resources and domains.
 
 In further sections I'll discuss
-- User and Login with `AshAuthentication`
 - Integrating Ash models with LiveView forms
-- REST API with `AshJsonApi`
-- GraphQL API with `AshGraphql`
+- User and Login with [`AshAuthentication`](https://hexdocs.pm/ash_authentication_phoenix/get-started.html)
+- REST API with [`AshJsonApi`](https://ash-hq.org/docs/guides/ash_json_api/latest/tutorials/getting-started-with-ash-json-api)
+- GraphQL API with [`AshGraphql`](https://ash-hq.org/docs/guides/ash_graphql/latest/tutorials/getting-started-with-graphql)
 
-### Section 4: TBD
+### Section 4: Users with Ash Authentication
+
+I follower [this tutorial](https://hexdocs.pm/ash_authentication_phoenix/get-started.html) for adding users to a Phoenix app with Ash Authentication and Ash Phoenix Authentication. I did not write addtional code.
+
+### Section 5: REST API with with Ash JSON API
+
+### Section 6: GraphQL API with Ash GraphQL

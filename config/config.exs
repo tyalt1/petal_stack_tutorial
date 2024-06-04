@@ -8,7 +8,8 @@
 import Config
 
 config :petal_stack_tutorial,
-  ash_domains: [PetalStackTutorial.Blog]
+  ash_domains: [PetalStackTutorial.Accounts, PetalStackTutorial.Blog],
+  ash_apis: [PetalStackTutorial.Accounts]
 
 # Configures the endpoint
 config :petal_stack_tutorial, PetalStackTutorialWeb.Endpoint,

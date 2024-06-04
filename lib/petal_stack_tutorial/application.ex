@@ -18,7 +18,8 @@ defmodule PetalStackTutorial.Application do
       # Start a worker by calling: PetalStackTutorial.Worker.start_link(arg)
       # {PetalStackTutorial.Worker, arg},
       # Start to serve requests, typically the last entry
-      PetalStackTutorialWeb.Endpoint
+      PetalStackTutorialWeb.Endpoint,
+      {AshAuthentication.Supervisor, otp_app: :petal_stack_tutorial}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

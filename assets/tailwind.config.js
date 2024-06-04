@@ -9,7 +9,8 @@ module.exports = {
   content: [
     "./js/**/*.js",
     "../lib/petal_stack_tutorial_web.ex",
-    "../lib/petal_stack_tutorial_web/**/*.*ex"
+    "../lib/petal_stack_tutorial_web/**/*.*ex",
+    "../deps/ash_authentication_phoenix/**/*.*ex",
   ],
   theme: {
     extend: {

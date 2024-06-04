@@ -36,6 +36,8 @@ defmodule PetalStackTutorial.MixProject do
       {:ash, "~> 3.0"},
       {:ash_phoenix, "~> 2.0"},
       {:ash_postgres, "~> 2.0"},
+      {:ash_authentication, "~> 4.0"},
+      {:ash_authentication_phoenix, "~> 2.0"},
 
       # phoenix
       {:phoenix, "~> 1.7.12"},
@@ -76,7 +78,7 @@ defmodule PetalStackTutorial.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ash.setup", "assets.setup", "assets.build"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      test: ["ash.setup --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind petal_stack_tutorial", "esbuild petal_stack_tutorial"],
       "assets.deploy": [
