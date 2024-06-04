@@ -29,12 +29,14 @@ defmodule PetalStackTutorial.Blog.Post do
     end
 
     update :update do
-      accept [:content] # only edit content, not title
+      # only edit content, not title
+      accept [:content]
     end
 
     read :get do
       argument :id, :uuid, allow_nil?: false
-      get? true # read will only return 1 value, not a list
+      # read will only return 1 value, not a list
+      get? true
       filter expr(id == ^arg(:id))
     end
   end
