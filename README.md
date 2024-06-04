@@ -531,7 +531,7 @@ In further sections I'll discuss
 
 ### Section 4: Users with Ash Authentication
 
-I follower [this tutorial](https://hexdocs.pm/ash_authentication_phoenix/get-started.html) for adding users to a Phoenix app with Ash Authentication and Ash Phoenix Authentication. I did not write addtional code.
+I follower [this tutorial](https://hexdocs.pm/ash_authentication_phoenix/get-started.html) for adding users to a Phoenix app with Ash Authentication and Ash Phoenix Authentication. I did not write additional code.
 
 ### Section 5: REST API with with Ash JSON API
 
