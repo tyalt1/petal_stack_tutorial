@@ -48,7 +48,7 @@ This is a summary of notable commits, and sections that go into that code in gre
  2 | [`d2a1733`](https://github.com/tyalt1/petal_stack_tutorial/commit/d2a17336ceb58cb769fdd052cf838e73a344b453) | LiveView Example
  3 | [`0658c29`](https://github.com/tyalt1/petal_stack_tutorial/commit/0658c2911d7ca8b52ebeabcc8e930d4336edbdf7) | Ash.Resource Example
  4 | [`da74838`](https://github.com/tyalt1/petal_stack_tutorial/commit/da74838c458e23868d344bcfce907bc964eb5d22) | AshAuthentication Example
- 5 | [`nil`]() | AshJsonApi Example
+ 5 | [`1d0338f`](https://github.com/tyalt1/petal_stack_tutorial/commit/1d0338f287dcdbb68104174f895400acc9a33f32) | AshJsonApi Example
  6 | [`nil`]() | AshGraphql Example
 
 ## Tutorial
