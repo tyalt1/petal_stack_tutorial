@@ -59,8 +59,8 @@ This is a summary of notable commits, and sections that go into that code in gre
 2. [Intro to LiveView](#section-2-intro-to-liveview)
 3. [Intro to Ash](#section-3-intro-to-ash)
 4. [Users with Ash Authentication](#section-4-users-with-ash-authentication)
-5. [REST API with with Ash JSON API](#section-5-rest-api-with-with-ash-json-api)
-6. GraphQL API with Ash GraphQL
+5. [REST API with with Ash JSON API](#section-5-rest-api-with-ash-json-api)
+6. [GraphQL API with Ash GraphQL]()
 
 ### Section 1: Setup Elixir and Phoenix
 
