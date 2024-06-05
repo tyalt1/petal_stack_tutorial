@@ -17,6 +17,10 @@ defmodule PetalStackTutorialWeb.Router do
     plug :load_from_bearer
   end
 
+  pipeline :graphql do
+    plug AshGraphql.Plug
+  end
+
   scope "/", PetalStackTutorialWeb do
     pipe_through :browser
 
@@ -32,10 +36,22 @@ defmodule PetalStackTutorialWeb.Router do
     reset_route []
   end
 
-  scope "/api/json" do
-    pipe_through :api
+  scope "/api" do
+    scope "/json" do
+      pipe_through :api
+      forward "/", PetalStackTutorialWeb.JsonApiRouter
+    end
 
-    forward "/", PetalStackTutorialWeb.JsonApiRouter
+    scope "/gql" do
+      pipe_through :graphql
+
+      forward "/playground",
+              Absinthe.Plug.GraphiQL,
+              schema: PetalStackTutorialWeb.GraphqlSchema,
+              interface: :playground
+
+      forward "/", Absinthe.Plug, schema: PetalStackTutorialWeb.GraphqlSchema
+    end
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
@@ -67,4 +83,15 @@ defmodule PetalStackTutorialWeb.JsonApiRouter do
     domains: [PetalStackTutorial.Blog],
     json_schema: "/json_schema",
     open_api: "/open_api"
+end
+
+defmodule PetalStackTutorialWeb.GraphqlSchema do
+  use Absinthe.Schema
+  use AshGraphql, domains: [PetalStackTutorial.Blog]
+
+  query do
+  end
+
+  mutation do
+  end
 end

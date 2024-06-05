@@ -3,7 +3,8 @@ defmodule PetalStackTutorial.Blog.Post do
     domain: PetalStackTutorial.Blog,
     data_layer: AshPostgres.DataLayer,
     extensions: [
-      AshJsonApi.Resource
+      AshJsonApi.Resource,
+      AshGraphql.Resource
     ]
 
   postgres do
@@ -55,6 +56,21 @@ defmodule PetalStackTutorial.Blog.Post do
       post :create
       patch :update
       delete :destroy
+    end
+  end
+
+  graphql do
+    type :post
+
+    queries do
+      get :get_post, :read
+      list :list_posts, :read
+    end
+
+    mutations do
+      create :create_post, :create
+      update :update_post, :update
+      destroy :destroy_post, :destroy
     end
   end
 end

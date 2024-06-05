@@ -1,7 +1,9 @@
 defmodule PetalStackTutorial.Blog do
-  use Ash.Domain, extensions: [
-    AshJsonApi.Domain
-  ]
+  use Ash.Domain,
+    extensions: [
+      AshJsonApi.Domain,
+      AshGraphql.Domain
+    ]
 
   resources do
     resource PetalStackTutorial.Blog.Post do
@@ -11,5 +13,9 @@ defmodule PetalStackTutorial.Blog do
       define :destroy_post, action: :destroy
       define :get_post, action: :get, args: [:id]
     end
+  end
+
+  graphql do
+    authorize? false
   end
 end

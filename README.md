@@ -38,6 +38,20 @@ Elixir runs on the Erlang VM which has many examples of scalability
 - With LiveView developers can write reactive single-page frontends in HTML and Elixir. (No Javascript)
 - Ash lets you define a model and then with minimal code derive database persistance, code wrappers, REST API, GraphQL API, and more.
 
+## PETAL Stack Q/A
+
+### Q: Do I have to use Ash?
+
+No. Ash is not needed. But I recommend Ash because it puts a lot of complexity up front and pays dividends later. With Ecto, the default database library for Phoenix, you declare the schema and only derive Database persistance and some validation. With Ash you declare the schema and get the following:
+
+- Resource and Domain level functions
+- Database persistance (Postgres, SQLite3)
+- alternative persistance (in memory, ETS table, Mnesia table, CSV file)
+- Form validation
+- JSON API mapping
+- GraphQL API mapping
+- and more with a robust extension system ...
+
 ## Commit References
 
 This is a summary of notable commits, and sections that go into that code in greater detail.
@@ -293,6 +307,8 @@ defp deps do
   ]
 end
 ```
+
+Note: `AshPostgres` is built on top of `Ecto`, a database library for Elixir. `Ecto` is what Phoenix uses by default for communicating with the database.
 
 Optionally, make the changes to `.formatter.exs`
 ```elixir
@@ -678,3 +694,109 @@ For the sake of completeness, next I want to show how to add a GraphQL API.
 We can add a GraphQL API for the Blog domain.
 
 I followed [this getting started guide](https://ash-hq.org/docs/guides/ash_graphql/latest/tutorials/getting-started-with-graphql) for adding `AshGraphql`.
+
+Add the `ash_json_api` dependency:
+```elixir
+defp deps do
+  [
+    # ...
+    {:ash_graphql, "~> 1.1.1"},
+    # ...
+  ]
+end
+```
+
+Note: `AshGraphql` is built on top of `Absinthe`, a GraphQL library for Elixir.
+
+Add to `.formatter.exs`:
+```elixir
+[
+  import_deps: [
+    # ...
+    :ash_graphql
+  ],
+  #...
+]
+```
+
+Add the `AshGraphql.Domain` extension to the domain. Also, disable authorization for easy prototyping.
+```elixir
+defmodule PetalStackTutorial.Blog do
+  use Ash.Domain,
+    extensions: [
+      # ...
+      AshGraphql.Domain # <-- add this
+    ]
+  
+  # ...
+  graphql do
+    authorize? false
+  end
+end
+```
+
+Add the `AshGraphql.Domain` extension to the resource. Then specify 
+```elixir
+defmodule PetalStackTutorial.Blog.Post do
+  use Ash.Resource,
+    domain: PetalStackTutorial.Blog,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [
+      AshJsonApi.Resource,
+      AshGraphql.Resource
+    ]
+  
+  graphql do
+  end
+end
+```
+
+Create a schema.
+```elixir
+defmodule PetalStackTutorialWeb.GraphqlSchema do
+  use Absinthe.Schema
+  use AshGraphql, domains: [PetalStackTutorial.Blog]
+
+  query do
+  end
+
+  mutation do
+  end
+end
+```
+
+Add the schema to `router.ex`. Use the `Absinthe.Plug` with your schema to serve the main GraphQL API. Also use the `Absinthe.Plug.GraphiQL` to create an interactive version of graphql
+```elixir
+defmodule PetalStackTutorialWeb.Router do
+  use PetalStackTutorialWeb, :router
+  # ...
+  pipeline :graphql do
+    plug AshGraphql.Plug
+  end
+  # ...
+
+  scope "/gql" do
+    pipe_through :graphql
+
+    forward "/playground",
+            Absinthe.Plug.GraphiQL,
+            schema: PetalStackTutorialWeb.GraphqlSchema,
+            interface: :playground
+
+    forward "/", Absinthe.Plug, schema: PetalStackTutorialWeb.GraphqlSchema
+  end
+end
+```
+
+Now when I visit http://localhost:4000/api/gql/playground it shows an interactive version of GraphQL. There is a "SCHEMA" tab on the right that contains all queries and mutations.
+
+I can make the following query:
+```graphql
+query {
+  getPost(id: "7e9cc199-7c5f-4196-bb7c-d28550d6b7c2") {
+    id
+  }
+}
+```
+
+### Section 7: TBD
