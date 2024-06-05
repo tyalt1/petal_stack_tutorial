@@ -38,7 +38,7 @@ Elixir runs on the Erlang VM which has many examples of scalability
 - With LiveView developers can write reactive single-page frontends in HTML and Elixir. (No Javascript)
 - Ash lets you define a model and then with minimal code derive database persistance, code wrappers, REST API, GraphQL API, and more.
 
-## Table of Contents
+## Commit References
 
 This is a summary of notable commits, and sections that go into that code in greater detail.
 
@@ -52,6 +52,15 @@ This is a summary of notable commits, and sections that go into that code in gre
  6 | [`nil`]() | AshGraphql Example
 
 ## Tutorial
+
+### Table of Contents
+
+1. [Setup Elixir and Phoenix](#section-1-setup-elixir-and-phoenix)
+2. [Intro to LiveView](#section-2-intro-to-liveview)
+3. [Intro to Ash](#section-3-intro-to-ash)
+4. [Users with Ash Authentication](#section-4-users-with-ash-authentication)
+5. [REST API with with Ash JSON API](#section-5-rest-api-with-with-ash-json-api)
+6. GraphQL API with Ash GraphQL
 
 ### Section 1: Setup Elixir and Phoenix
 
@@ -179,7 +188,7 @@ end
 
 Note: The `~H` sigil is a macro that turns the string into a HEEx template.
 
-Note: The `@` is a macro that accesses the assigns map. `@counter` is equivalent to `assigns[:counter]`.
+Note: The `@` is a macro within a HEEx template that accesses the assigns map. `@counter` is equivalent to `assigns[:counter]`.
 
 Note: When displaying a Elixir value in a HEEx template, use `<%= ... %>` for values in HTML and `{ ... }` for values as attributes.
 
@@ -533,11 +542,13 @@ In further sections I'll discuss
 
 ### Section 4: Users with Ash Authentication
 
-I follower [this tutorial](https://hexdocs.pm/ash_authentication_phoenix/get-started.html) for adding users to a Phoenix app with Ash Authentication and Ash Phoenix Authentication. I did not write additional code.
+I followed [this tutorial](https://hexdocs.pm/ash_authentication_phoenix/get-started.html) for adding users to a Phoenix app with Ash Authentication and Ash Phoenix Authentication. I did not write additional code.
 
-### Section 5: REST API with with Ash JSON API
+### Section 5: REST API with Ash JSON API
 
 We can add a REST API for the Blog domain we added earlier.
+
+I followed [this getting started guide](https://ash-hq.org/docs/guides/ash_json_api/latest/tutorials/getting-started-with-ash-json-api) for adding `AshJsonApi`.
 
 Add the `ash_json_api` dependency:
 ```elixir
@@ -663,3 +674,7 @@ To add new domains to the API, simply add the domain to the `JsonApiRouter` doma
 For the sake of completeness, next I want to show how to add a GraphQL API.
 
 ### Section 6: GraphQL API with Ash GraphQL
+
+We can add a GraphQL API for the Blog domain.
+
+I followed [this getting started guide](https://ash-hq.org/docs/guides/ash_graphql/latest/tutorials/getting-started-with-graphql) for adding `AshGraphql`.
