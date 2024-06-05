@@ -63,7 +63,7 @@ This is a summary of notable commits, and sections that go into that code in gre
  3 | [`0658c29`](https://github.com/tyalt1/petal_stack_tutorial/commit/0658c2911d7ca8b52ebeabcc8e930d4336edbdf7) | Ash.Resource Example
  4 | [`da74838`](https://github.com/tyalt1/petal_stack_tutorial/commit/da74838c458e23868d344bcfce907bc964eb5d22) | AshAuthentication Example
  5 | [`1d0338f`](https://github.com/tyalt1/petal_stack_tutorial/commit/1d0338f287dcdbb68104174f895400acc9a33f32) | AshJsonApi Example
- 6 | [`nil`]() | AshGraphql Example
+ 6 | [`5ca4a08`](https://github.com/tyalt1/petal_stack_tutorial/commit/5ca4a088e00289b6cb8334b04f3244a55e3c4fd2) | AshGraphql Example
 
 ## Tutorial
 
@@ -74,7 +74,7 @@ This is a summary of notable commits, and sections that go into that code in gre
 3. [Intro to Ash](#section-3-intro-to-ash)
 4. [Users with Ash Authentication](#section-4-users-with-ash-authentication)
 5. [REST API with with Ash JSON API](#section-5-rest-api-with-ash-json-api)
-6. [GraphQL API with Ash GraphQL]()
+6. [GraphQL API with Ash GraphQL](#section-6-graphql-api-with-ash-graphql)
 
 ### Section 1: Setup Elixir and Phoenix
 
@@ -735,7 +735,7 @@ defmodule PetalStackTutorial.Blog do
 end
 ```
 
-Add the `AshGraphql.Domain` extension to the resource. Then specify 
+Add the `AshGraphql.Domain` extension to the resource. Then specify what queries or mutations trigger which actions.
 ```elixir
 defmodule PetalStackTutorial.Blog.Post do
   use Ash.Resource,
@@ -747,11 +747,23 @@ defmodule PetalStackTutorial.Blog.Post do
     ]
   
   graphql do
+    type :post
+
+    queries do
+      get :get_post, :read
+      list :list_posts, :read
+    end
+
+    mutations do
+      create :create_post, :create
+      update :update_post, :update
+      destroy :destroy_post, :destroy
+    end
   end
 end
 ```
 
-Create a schema.
+Create a schema. Here you can create top level queries or mutations, but for now we'll leave them blank.
 ```elixir
 defmodule PetalStackTutorialWeb.GraphqlSchema do
   use Absinthe.Schema
@@ -765,7 +777,7 @@ defmodule PetalStackTutorialWeb.GraphqlSchema do
 end
 ```
 
-Add the schema to `router.ex`. Use the `Absinthe.Plug` with your schema to serve the main GraphQL API. Also use the `Absinthe.Plug.GraphiQL` to create an interactive version of graphql
+Add the schema to `router.ex`. Use the `Absinthe.Plug` with your schema to serve the main GraphQL API. Also use the `Absinthe.Plug.GraphiQL` to create an interactive version of GraphQL.
 ```elixir
 defmodule PetalStackTutorialWeb.Router do
   use PetalStackTutorialWeb, :router
@@ -774,7 +786,6 @@ defmodule PetalStackTutorialWeb.Router do
     plug AshGraphql.Plug
   end
   # ...
-
   scope "/gql" do
     pipe_through :graphql
 
