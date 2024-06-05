@@ -1,5 +1,7 @@
 defmodule PetalStackTutorial.Blog do
-  use Ash.Domain
+  use Ash.Domain, extensions: [
+    AshJsonApi.Domain
+  ]
 
   resources do
     resource PetalStackTutorial.Blog.Post do

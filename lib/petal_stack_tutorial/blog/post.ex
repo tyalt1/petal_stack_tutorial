@@ -2,7 +2,9 @@ defmodule PetalStackTutorial.Blog.Post do
   use Ash.Resource,
     domain: PetalStackTutorial.Blog,
     data_layer: AshPostgres.DataLayer,
-    extensions: []
+    extensions: [
+      AshJsonApi.Resource
+    ]
 
   postgres do
     table "posts"
@@ -15,6 +17,7 @@ defmodule PetalStackTutorial.Blog.Post do
     update_timestamp :updated_at
 
     attribute :title, :string do
+      public? true
       allow_nil? false
     end
 
@@ -38,6 +41,20 @@ defmodule PetalStackTutorial.Blog.Post do
       # read will only return 1 value, not a list
       get? true
       filter expr(id == ^arg(:id))
+    end
+  end
+
+  json_api do
+    type "post"
+
+    routes do
+      base "/posts"
+
+      get :get
+      index :read
+      post :create
+      patch :update
+      delete :destroy
     end
   end
 end

@@ -48,6 +48,8 @@ This is a summary of notable commits, and sections that go into that code in gre
  2 | [`d2a1733`](https://github.com/tyalt1/petal_stack_tutorial/commit/d2a17336ceb58cb769fdd052cf838e73a344b453) | LiveView Example
  3 | [`0658c29`](https://github.com/tyalt1/petal_stack_tutorial/commit/0658c2911d7ca8b52ebeabcc8e930d4336edbdf7) | Ash.Resource Example
  4 | [`da74838`](https://github.com/tyalt1/petal_stack_tutorial/commit/da74838c458e23868d344bcfce907bc964eb5d22) | AshAuthentication Example
+ 5 | [`nil`]() | AshJsonApi Example
+ 6 | [`nil`]() | AshGraphql Example
 
 ## Tutorial
 
@@ -534,5 +536,130 @@ In further sections I'll discuss
 I follower [this tutorial](https://hexdocs.pm/ash_authentication_phoenix/get-started.html) for adding users to a Phoenix app with Ash Authentication and Ash Phoenix Authentication. I did not write additional code.
 
 ### Section 5: REST API with with Ash JSON API
+
+We can add a REST API for the Blog domain we added earlier.
+
+Add the `ash_json_api` dependency:
+```elixir
+defp deps do
+  [
+    # ...
+    {:ash_json_api, "~> 1.0"},
+    {:open_api_spex, "~> 3.16"}, # <- Optional, used later
+    # ...
+  ]
+end
+```
+
+Add to `.formatter.exs`:
+```elixir
+[
+  import_deps: [
+    # ...
+    :ash_json_api
+  ],
+  #...
+]
+```
+
+Add `AshJsonApi.Domain` extension to the domain
+```elixir
+defmodule PetalStackTutorial.Blog do
+  use Ash.Domain, extensions: [
+    AshJsonApi.Domain # <-- add this
+  ]
+  # ...
+end
+```
+
+You can add a `json_api` block in the domain to declare routes, but for now we'll add them to the resource.
+
+Make the following changes to the Post resource, including adding the extension:
+```elixir
+defmodule PetalStackTutorial.Blog.Post do
+  use Ash.Resource,
+    domain: PetalStackTutorial.Blog,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [
+      AshJsonApi.Resource # <-- add this
+    ]
+
+  attributes do
+    # ...
+    attribute :title, :string do
+      public? true # <-- add this
+      allow_nil? false
+    end
+    # ...
+  end
+
+  json_api do
+    type "post"
+
+    routes do
+      base "/posts"
+
+      get :read
+      index :read
+      post :create
+      patch :update
+      delete :destroy
+    end
+  end
+end
+```
+
+And that's all you need to add to your model.
+1. Add the `AshJsonApi.Resource` extention.
+2. We made the title attribute public. (Note: the content attribute is implicilty private, meaning it will not show in responses)
+3. Add the `json_api` block which declares a base route, and which HTTP verbs trigger which actions.
+
+Now we need to create a router for our API and forward to it from our main router:
+```elixir
+defmodule PetalStackTutorialWeb.Router do
+  use PetalStackTutorialWeb, :router
+  # ...
+
+  scope "/api/json" do
+    pipe_through :api
+
+    forward "/", PetalStackTutorialWeb.JsonApiRouter
+  end
+
+  # ...
+end
+
+defmodule PetalStackTutorialWeb.JsonApiRouter do
+  use AshJsonApi.Router,
+    domains: [PetalStackTutorial.Blog],
+    json_schema: "/json_schema",
+    open_api: "/open_api"
+end
+```
+
+If user curl, Postman, or a browswer on  http://localhost:4000/api/json/posts I see a list all posts.
+
+When I go to http://localhost:4000/api/json/open_api I see an OpenAPI JSON spec of my API. If `open_api_spex` is installed then you can added the following (recommended to the dev scope) that will render a SwaggerUI to dispay documentation of your API.
+
+```elixir
+# ...
+scope "/dev" do
+  pipe_through :browser
+  # ...
+  forward "/api/swaggerui",
+    OpenApiSpex.Plug.SwaggerUI,
+    path: "/api/json/open_api",
+    title: "PetalStackTutorialWeb JSON-API - Swagger UI",
+    default_model_expand_depth: 4
+  # ...
+end
+# ...
+```
+
+And now visiting http://localhost:4000/dev/api/swagger shows that SwaggerUI.
+
+To add new domains to the API, simply add the domain to the `JsonApiRouter` domain list. The behavoir is already implented in the `attributes` and `actions` blocks of the resource. This is where Ash really starts paying dividends.
+
+For the sake of completeness, next I want to show how to add a GraphQL API.
 
 ### Section 6: GraphQL API with Ash GraphQL
